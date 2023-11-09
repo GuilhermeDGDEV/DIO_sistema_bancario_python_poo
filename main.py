@@ -1,3 +1,4 @@
+from os import system
 import functions.banco as b
 
 
@@ -26,6 +27,9 @@ def main():
 
         elif opcao == 'lc':
             b.listar_contas(contas)
+
+        elif opcao == 'l':
+            system('cls')
 
         elif opcao == 'q':
             break

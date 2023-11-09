@@ -14,6 +14,7 @@ def menu():
     [nc]\tNova conta
     [lc]\tListar contas
     [nu]\tNovo usuário
+    [l]\tLimpar
     [q]\tSair
     => '''
     return input(textwrap.dedent(menu))
@@ -50,8 +51,14 @@ def recuperar_conta_cliente(cliente):
         print(f'\n{ " Cliente não possui conta! ".center(100, "@") }')
         return
 
-    # FIXME: não permite cliente escolher a conta
-    return cliente.contas[0]
+    n_conta = int(input('Informe o número da conta do cliente: '))
+
+    for conta in cliente.contas:
+        print(conta.numero == n_conta)
+
+    contas_filtradas = [conta for conta in cliente.contas if conta.numero == n_conta]
+
+    return contas_filtradas[0] if contas_filtradas else None
 
 
 def depositar(clientes):
@@ -128,8 +135,6 @@ def criar_cliente(clientes):
     nome = input('Informe o nome completo: ')
     data_nascimento = input('Informe a data de nascimento (dd-mm-aaaa): ')
     endereco = input('Informe o endereço (logradouro, nro - bairro - cidade/sigla estado): ')
-
-    # data_nascimento = datetime.strptime(data_nascimento, '%d-%m-%Y').date()
 
     cliente = PessoaFisica(nome, data_nascimento, cpf, endereco)
 
