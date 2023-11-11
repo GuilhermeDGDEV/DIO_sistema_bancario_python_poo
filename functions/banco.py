@@ -3,6 +3,7 @@ from entities.conta_corrente import ContaCorrente
 from entities.pessoa_fisica import PessoaFisica
 from entities.saque import Saque
 from entities.deposito import Deposito
+from functions.utils import is_date, is_float, is_cpf
 
 
 def menu():
@@ -28,6 +29,11 @@ def listar_contas(contas):
 
 def criar_conta(numero_conta, clientes, contas):
     cpf = input('Informe o CPF do cliente: ')
+
+    if not is_cpf(cpf):
+        print(f'\n{ " CPF inválido! ".center(100, "@") }')
+        return
+
     cliente = filtrar_cliente(cpf, clientes)
 
     if not cliente:
@@ -53,9 +59,6 @@ def recuperar_conta_cliente(cliente):
 
     n_conta = int(input('Informe o número da conta do cliente: '))
 
-    for conta in cliente.contas:
-        print(conta.numero == n_conta)
-
     contas_filtradas = [conta for conta in cliente.contas if conta.numero == n_conta]
 
     return contas_filtradas[0] if contas_filtradas else None
@@ -63,42 +66,66 @@ def recuperar_conta_cliente(cliente):
 
 def depositar(clientes):
     cpf = input('Informe o CPF do cliente: ')
+
+    if not is_cpf(cpf):
+        print(f'\n{ " CPF inválido! ".center(100, "@") }')
+        return
+
     cliente = filtrar_cliente(cpf, clientes)
 
     if not cliente:
         print(f'\n{ " Cliente não possui conta! ".center(100, "@") }')
         return
 
-    valor = float(input('Informe o valor do depósito: '))
-    transacao = Deposito(valor)
+    valor = input('Informe o valor do depósito: ')
 
-    conta = recuperar_conta_cliente(cliente)
-    if not conta:
-        return
+    if is_float(valor) and float(valor) > 0:
+        transacao = Deposito(valor)
 
-    cliente.realizar_transacao(conta, transacao)
+        conta = recuperar_conta_cliente(cliente)
+        if not conta:
+            print(f'\n{ " Conta não encontrada! ".center(100, "@") }')
+            return
+
+        cliente.realizar_transacao(conta, transacao)
+    else:
+       print(f'\n{ " Valor de depósito inválido! ".center(100, "@") }')
 
 
 def sacar(clientes):
     cpf = input('Informe o CPF do cliente: ')
+
+    if not is_cpf(cpf):
+        print(f'\n{ " CPF inválido! ".center(100, "@") }')
+        return
+
     cliente = filtrar_cliente(cpf, clientes)
 
     if not cliente:
         print(f'\n{ " Cliente não possui conta! ".center(100, "@") }')
         return
 
-    valor = float(input('Informe o valor do saque: '))
-    transacao = Saque(valor)
+    valor = input('Informe o valor do saque: ')
+    if is_float(valor) and float(valor) > 0:
+        transacao = Saque(valor)
 
-    conta = recuperar_conta_cliente(cliente)
-    if not conta:
-        return
+        conta = recuperar_conta_cliente(cliente)
+        if not conta:
+            print(f'\n{ " Conta não encontrada! ".center(100, "@") }')
+            return
 
-    cliente.realizar_transacao(conta, transacao)
+        cliente.realizar_transacao(conta, transacao)
+    else:
+        print(f'\n{ " Valor de saque inválido! ".center(100, "@") }')
 
 
 def exibir_extrato(clientes):
     cpf = input('Informe o CPF do cliente: ')
+
+    if not is_cpf(cpf):
+        print(f'\n{ " CPF inválido! ".center(100, "@") }')
+        return
+
     cliente = filtrar_cliente(cpf, clientes)
 
     if not cliente:
@@ -107,6 +134,7 @@ def exibir_extrato(clientes):
 
     conta = recuperar_conta_cliente(cliente)
     if not conta:
+        print(f'\n{ " Conta não encontrada! ".center(100, "@") }')
         return
 
     print(f'\n {" EXTRATO ".center(100, "=")} ')
@@ -126,6 +154,11 @@ def exibir_extrato(clientes):
 
 def criar_cliente(clientes):
     cpf = input('Informe o CPF (somente número): ')
+
+    if not is_cpf(cpf):
+        print(f'\n{ " CPF inválido! ".center(100, "@") }')
+        return
+
     cliente = filtrar_cliente(cpf, clientes)
 
     if cliente:
@@ -134,6 +167,10 @@ def criar_cliente(clientes):
 
     nome = input('Informe o nome completo: ')
     data_nascimento = input('Informe a data de nascimento (dd-mm-aaaa): ')
+
+    while not is_date(data_nascimento):
+        data_nascimento = input('Data inválida! Informe a data de nascimento (dd-mm-aaaa): ')
+
     endereco = input('Informe o endereço (logradouro, nro - bairro - cidade/sigla estado): ')
 
     cliente = PessoaFisica(nome, data_nascimento, cpf, endereco)
@@ -141,18 +178,3 @@ def criar_cliente(clientes):
     clientes.append(cliente)
 
     print(f'\n{ " Cliente cadastrado com sucesso! ".center(100, "=") }')
-
-
-def criar_conta(numero_conta, clientes, contas):
-    cpf = input('Informe o CPF do cliente: ')
-    cliente = filtrar_cliente(cpf, clientes)
-
-    if not cliente:
-        print(f'\n{ " Cliente não encontrado, fluxo de criação de conta encerrado! ".center(100, "@") }')
-        return
-
-    conta = ContaCorrente.nova_conta(cliente, numero_conta)
-    contas.append(conta)
-    cliente.contas.append(conta)
-
-    print(f'\n{ " Conta criada com sucesso! ".center(100, "=") }')
